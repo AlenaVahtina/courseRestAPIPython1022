@@ -41,7 +41,7 @@ class TestUserEdit(BaseCase):
         url_check_user = f'https://playground.learnqa.ru/api/user/{user_id}'
         r4 = requests.get(url_check_user, headers={"x-csrf-token": token}, cookies={"auth_sid": auth_sid})
 
-        assert r3.status_code == 200, "Wrong status code"
+        assert r4.status_code == 200, "Wrong status code"
         Assertions.assert_json_value_by_name(r4, 'firstName', new_name, "Wrong name of the user after edit")
 
     def test_edit_just_created_user_by_unauth_user(self):
