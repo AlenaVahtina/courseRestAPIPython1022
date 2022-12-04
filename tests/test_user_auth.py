@@ -2,8 +2,9 @@ import pytest
 import requests
 from lib.base_case import BaseCase
 from lib.assertions import Assertions
+import allure
 
-
+@allure.epic("Auth tests")
 class TestUserAuth(BaseCase, Assertions):
 
     def setup(self):
@@ -20,6 +21,7 @@ class TestUserAuth(BaseCase, Assertions):
         self.token = self.get_header(r1, "x-csrf-token")
         self.user_id_from_auth_method = self.get_json_value(r1, "user_id")
 
+    @allure.description("Test auth user")
     def test_auth_user(self):
         url_auth = 'https://playground.learnqa.ru/api/user/auth'
         r2 = requests.get(url_auth, headers={"x-csrf-token": self.token}, cookies={"auth_sid": self.auth_sid})

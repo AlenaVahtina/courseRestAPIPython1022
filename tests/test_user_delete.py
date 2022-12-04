@@ -3,8 +3,10 @@ import pytest
 import requests
 from lib.base_case import BaseCase
 from lib.assertions import Assertions
+import allure
 
 
+@allure.epic("Test delete user")
 class TestUserDelete(BaseCase, Assertions):
 
     url_create_user = 'https://playground.learnqa.ru/api/user/'
@@ -23,11 +25,15 @@ class TestUserDelete(BaseCase, Assertions):
         random_part = datetime.now().strftime("%m%d%Y%H%M%S")
         self.email = f"{base_part}{random_part}@{domain}"
 
+    @allure.description("Delete user vinkotov@example.com")
     def test_delete_default_user(self):
         data = {
             'email': 'vinkotov@example.com',
             'password': '1234'
         }
+
+        allure.step("Step 1: login user vinkotov")
+
         url_login = "https://playground.learnqa.ru/api/user/login"
         r1 = requests.post(url_login, data=data)
 
@@ -37,18 +43,22 @@ class TestUserDelete(BaseCase, Assertions):
         token = self.get_header(r1, "x-csrf-token")
         user_id = self.get_json_value(r1, "user_id")
 
+        allure.step("Step 2: auth user vinkotov")
         url_auth = 'https://playground.learnqa.ru/api/user/auth'
         r2 = requests.get(url_auth, headers={"x-csrf-token": token}, cookies={"auth_sid": auth_sid})
 
         assert r2.status_code == 200, "Wrong status code"
 
+        allure.step("Step 3: delete user vinkotov")
         url_delete_user = f"https://playground.learnqa.ru/api/user/{user_id}"
         r3 = requests.delete(url_delete_user, headers={"x-csrf-token": token}, cookies={"auth_sid": auth_sid})
 
         assert r3.status_code == 400, "Wrong status code"
         assert r3.text == "Please, do not delete test users with ID 1, 2, 3, 4 or 5.", "Wrong text message"
 
+    @allure.description("Delete just created user")
     def test_delete_user(self):
+        allure.step("Step 1: create user")
         url_create_user = 'https://playground.learnqa.ru/api/user/'
         register_data = self.prepare_registration_data()
         r1 = requests.post(url_create_user, data=register_data)
@@ -64,6 +74,8 @@ class TestUserDelete(BaseCase, Assertions):
             'email': email,
             'password': password
         }
+
+        allure.step(f"Step 2: login user {email}")
         url_login = "https://playground.learnqa.ru/api/user/login"
         r2 = requests.post(url_login, data=login_data)
 
@@ -72,11 +84,13 @@ class TestUserDelete(BaseCase, Assertions):
         auth_sid = self.get_cookie(r2, "auth_sid")
         token = self.get_header(r2, "x-csrf-token")
 
+        allure.step(f"Step 3: delete user {email}")
         url_delete_user = f"https://playground.learnqa.ru/api/user/{user_id}"
         r3 = requests.delete(url_delete_user, headers={"x-csrf-token": token}, cookies={"auth_sid": auth_sid})
 
         assert r3.status_code == 200, "Wrong status code"
 
+        allure.step(f"Step 4: check user {email}")
         url_check_user = f'https://playground.learnqa.ru/api/user/{user_id}'
         r4 = requests.get(url_check_user, headers={"x-csrf-token": None}, cookies={"auth_sid": None})
 
