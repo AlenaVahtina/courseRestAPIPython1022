@@ -1,7 +1,6 @@
 from datetime import datetime
 import pytest
 import requests
-import json
 from lib.base_case import BaseCase
 from lib.assertions import Assertions
 
